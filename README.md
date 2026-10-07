@@ -322,6 +322,10 @@ Esta parte permite interactuar con el sistema mediante la consola, ingresar el s
 
 **[David Rios Arias ,	Juan José García]**
 
+## 👥 Editor
+
+**[Simon Yepes Cano]**
+
 ---
 
 ## 📌 Conclusión
