@@ -246,24 +246,33 @@ def calcular_provisiones_prestacionales(ibc: float, salario_proporcional: float)
 # ------------------------------------------------------------------
 # LIQUIDACIÓN COMPLETA DE NÓMINA
 # ------------------------------------------------------------------
+class Empleado:
+    def __init__(self, codigo_empleado: str="", nombre: str = "", salario_base: float = 0, dias_trabajados: int = 0,
+                 horas_extra_diurnas: float = 0, horas_extra_nocturnas: float = 0,
+                 horas_extra_dominicales_diurnas: float = 0, horas_extra_dominicales_nocturnas: float = 0,
+                 horas_recargo_nocturno: float = 0, horas_recargo_dominical_festivo: float = 0,horas_mes: int = HORAS_MES_LEGAL):
+        self.nombre = nombre
+        self.codigo_empleado = codigo_empleado
+        self.salario_base = salario_base
+        self.dias_trabajados = dias_trabajados
+        self.horas_extra_diurnas = horas_extra_diurnas
+        self.horas_extra_nocturnas = horas_extra_nocturnas
+        self.horas_extra_dominicales_diurnas = horas_extra_dominicales_diurnas
+        self.horas_extra_dominicales_nocturnas = horas_extra_dominicales_nocturnas
+        self.horas_recargo_nocturno = horas_recargo_nocturno
+        self.horas_recargo_dominical_festivo = horas_recargo_dominical_festivo
+        self.horas_mes = horas_mes
 
 def liquidar_nomina(
-    salario_base: float,
-    dias_trabajados: int = 30,
-    horas_extra_diurnas: float = 0,
-    horas_extra_nocturnas: float = 0,
-    horas_extra_dominicales_diurnas: float = 0,
-    horas_extra_dominicales_nocturnas: float = 0,
-    horas_recargo_nocturno: float = 0,
-    horas_recargo_dominical_festivo: float = 0,
-    horas_mes: int = HORAS_MES_LEGAL,
+    datos_empleado: Empleado
+
 ) -> dict:
     """Realiza la liquidación completa de la nómina mensual de un
     trabajador y devuelve un diccionario con el detalle de:
       - valor de la hora ordinaria,
       - salario proporcional a los días trabajados,
       - auxilio de transporte,
-      - horas extra (diurnas, nocturnas, dominicales diurnas y
+      - horas e xtra (diurnas, nocturnas, dominicales diurnas y
         dominicales nocturnas),
       - recargos (nocturno y dominical/festivo),
       - IBC,
@@ -271,25 +280,25 @@ def liquidar_nomina(
       - total devengado, total deducido y neto a pagar,
       - provisión de prestaciones sociales a cargo del empleador."""
 
-    verificar_salario(salario_base)
-    verificar_dias(dias_trabajados)
-    verificar_horas(horas_extra_diurnas, "horas extra diurnas")
-    verificar_horas(horas_extra_nocturnas, "horas extra nocturnas")
-    verificar_horas(horas_extra_dominicales_diurnas, "horas extra dominicales diurnas")
-    verificar_horas(horas_extra_dominicales_nocturnas, "horas extra dominicales nocturnas")
-    verificar_horas(horas_recargo_nocturno, "horas de recargo nocturno")
-    verificar_horas(horas_recargo_dominical_festivo, "horas de recargo dominical/festivo")
+    verificar_salario(datos_empleado.salario_base)
+    verificar_dias(datos_empleado.dias_trabajados)
+    verificar_horas(datos_empleado.horas_extra_diurnas, "horas extra diurnas")
+    verificar_horas(datos_empleado.horas_extra_nocturnas, "horas extra nocturnas")
+    verificar_horas(datos_empleado.horas_extra_dominicales_diurnas, "horas extra dominicales diurnas")
+    verificar_horas(datos_empleado.horas_extra_dominicales_nocturnas, "horas extra dominicales nocturnas")
+    verificar_horas(datos_empleado.horas_recargo_nocturno, "horas de recargo nocturno")
+    verificar_horas(datos_empleado.horas_recargo_dominical_festivo, "horas de recargo dominical/festivo")
 
-    valor_hora = calcular_valor_hora_ordinaria(salario_base, horas_mes)
-    salario_proporcional = calcular_salario_proporcional(salario_base, dias_trabajados)
-    auxilio_transporte = calcular_auxilio_transporte(salario_base) * (dias_trabajados / 30)
+    valor_hora = calcular_valor_hora_ordinaria(datos_empleado.salario_base, datos_empleado.horas_mes)
+    salario_proporcional = calcular_salario_proporcional(datos_empleado.salario_base, datos_empleado.dias_trabajados)
+    auxilio_transporte = calcular_auxilio_transporte(datos_empleado.salario_base) * (datos_empleado.dias_trabajados / 30)
 
-    hed = calcular_hora_extra_diurna(valor_hora, horas_extra_diurnas)
-    hen = calcular_hora_extra_nocturna(valor_hora, horas_extra_nocturnas)
-    hedd = calcular_hora_extra_dominical_diurna(valor_hora, horas_extra_dominicales_diurnas)
-    hedn = calcular_hora_extra_dominical_nocturna(valor_hora, horas_extra_dominicales_nocturnas)
-    rn = calcular_recargo_nocturno(valor_hora, horas_recargo_nocturno)
-    rdf = calcular_recargo_dominical_festivo(valor_hora, horas_recargo_dominical_festivo)
+    hed = calcular_hora_extra_diurna(valor_hora, datos_empleado.horas_extra_diurnas)
+    hen = calcular_hora_extra_nocturna(valor_hora, datos_empleado.horas_extra_nocturnas)
+    hedd = calcular_hora_extra_dominical_diurna(valor_hora, datos_empleado.horas_extra_dominicales_diurnas)
+    hedn = calcular_hora_extra_dominical_nocturna(valor_hora, datos_empleado.horas_extra_dominicales_nocturnas)
+    rn = calcular_recargo_nocturno(valor_hora, datos_empleado.horas_recargo_nocturno)
+    rdf = calcular_recargo_dominical_festivo(valor_hora, datos_empleado.horas_recargo_dominical_festivo)
 
     total_horas_extra_y_recargos = hed + hen + hedd + hedn + rn + rdf
 

@@ -9,15 +9,26 @@ class Trabajador:
     """
     Clase que representa a un trabajador y almacena la información
     necesaria para realizar la liquidación de su nómina mensual.
+    "codigo_empleado": Es una cadena de texto con el código único del trabajador.
     "nombre": Es una cadena de texto con el nombre del trabajador.
     "salario_base": Es un flotante con el salario mensual fijo pactado.
     "dias_trabajados": Es un entero con los días efectivamente
     trabajados dentro del mes (0 a 30).
     """
-    def __init__(self, nombre: str, salario_base: float, dias_trabajados: int):
+    def __init__(self,codigo_empleado: str, nombre: str, salario_base: float, dias_trabajados: int,
+                 horas_extra_diurnas: float = 0, horas_extra_nocturnas: float = 0,
+                 horas_extra_dominicales_diurnas: float = 0, horas_extra_dominicales_nocturnas: float = 0,
+                 horas_recargo_nocturno: float = 0, horas_recargo_dominical_festivo: float = 0):
+        self.codigo_empleado = codigo_empleado
         self.nombre = nombre
         self.salario_base = salario_base
         self.dias_trabajados = dias_trabajados
+        self.horas_extra_diurnas = horas_extra_diurnas
+        self.horas_extra_nocturnas = horas_extra_nocturnas
+        self.horas_extra_dominicales_diurnas = horas_extra_dominicales_diurnas
+        self.horas_extra_dominicales_nocturnas = horas_extra_dominicales_nocturnas
+        self.horas_recargo_nocturno = horas_recargo_nocturno
+        self.horas_recargo_dominical_festivo = horas_recargo_dominical_festivo
 
     def resumen_liquidacion(self, resultado: dict) -> str:
         """
@@ -29,10 +40,11 @@ class Trabajador:
         provisiones = resultado["provisiones_prestacionales"]
         return (
             f"Trabajador: {self.nombre}\n"
+            f"Código: {self.codigo_empleado}\n"
             f"Salario base: ${self.salario_base:,.2f}\n"
             f"Días trabajados: {self.dias_trabajados}\n"
             f"----------------------------\n"
-            f"Valor hora ordinaria: ${resultado['valor_hora_ordinaria']:,.2f}\n"
+            f"Value hora ordinaria: ${resultado['valor_hora_ordinaria']:,.2f}\n"
             f"Salario proporcional: ${resultado['salario_proporcional']:,.2f}\n"
             f"Auxilio de transporte: ${resultado['auxilio_transporte']:,.2f}\n"
             f"Hora extra diurna (HED): ${resultado['hora_extra_diurna']:,.2f}\n"
@@ -57,6 +69,7 @@ class Trabajador:
         )
 
 
+
 def pedir_horas(mensaje: str) -> float:
     """Pide un número de horas por consola y lo retorna como float."""
     valor = input(mensaje)
@@ -69,8 +82,10 @@ print("   LIQUIDADOR DE NÓMINA - COLOMBIA")
 print("============================================")
 print("\n")
 
-nombre_trabajador = input("Ingrese el nombre del trabajador: ")
-salario_base = float(input("Ingrese el salario base mensual del trabajador: "))
+
+codigo_empleado = input("Ingrese el código del empleado: ")
+nombre = input("Ingrese el nombre del empleado: ")
+salario_base = float(input("Ingrese el salario base mensual del empleado: "))
 dias_trabajados = int(input("Ingrese los días trabajados en el mes (0 a 30): "))
 
 print("\n")
@@ -88,10 +103,10 @@ print("--------------------------------------------")
 
 while opcion_calcular != 3:
     if opcion_calcular == 1:
-        resultado = logica_nomina.liquidar_nomina(
+        resultado = logica_nomina.LiquidadorNomina(
             salario_base=salario_base, dias_trabajados=dias_trabajados
         )
-        trabajador_actual = Trabajador(nombre_trabajador, salario_base, dias_trabajados)
+        trabajador_actual = Trabajador(codigo_empleado, nombre, salario_base, dias_trabajados,horas_extra_diurnas=0, horas_extra_nocturnas=0, horas_extra_dominicales_diurnas=0, horas_extra_dominicales_nocturnas=0, horas_recargo_nocturno=0, horas_recargo_dominical_festivo=0)
         print(trabajador_actual.resumen_liquidacion(resultado))
         print("--------------------------------------------")
         print("\n")
@@ -106,19 +121,18 @@ while opcion_calcular != 3:
         horas_recargo_dominical_festivo = pedir_horas("Horas de recargo dominical/festivo (RDF): ")
 
         hoy = date.today()
-        resultado = logica_nomina.liquidar_nomina(
-            salario_base=salario_base,
-            dias_trabajados=dias_trabajados,
-            horas_extra_diurnas=horas_extra_diurnas,
-            horas_extra_nocturnas=horas_extra_nocturnas,
-            horas_extra_dominicales_diurnas=horas_extra_dominicales_diurnas,
-            horas_extra_dominicales_nocturnas=horas_extra_dominicales_nocturnas,
-            horas_recargo_nocturno=horas_recargo_nocturno,
-            horas_recargo_dominical_festivo=horas_recargo_dominical_festivo,
-        )
+        resultado = logica_nomina.liquidar_nomina(datos_empleado=logica_nomina.Empleado(
+            salario_base=salario_base, 
+            dias_trabajados=dias_trabajados, 
+            horas_extra_diurnas=horas_extra_diurnas, 
+            horas_extra_nocturnas=horas_extra_nocturnas, 
+            horas_extra_dominicales_diurnas=horas_extra_dominicales_diurnas, 
+            horas_extra_dominicales_nocturnas=horas_extra_dominicales_nocturnas, 
+            horas_recargo_nocturno=horas_recargo_nocturno, 
+            horas_recargo_dominical_festivo=horas_recargo_dominical_festivo))
 
         print(f"Nómina liquidada el {hoy}")
-        trabajador_actual = Trabajador(nombre_trabajador, salario_base, dias_trabajados)
+        trabajador_actual = Trabajador(codigo_empleado, nombre, salario_base, dias_trabajados,horas_extra_diurnas, horas_extra_nocturnas, horas_extra_dominicales_diurnas, horas_extra_dominicales_nocturnas, horas_recargo_nocturno, horas_recargo_dominical_festivo)
         print(trabajador_actual.resumen_liquidacion(resultado))
         print("--------------------------------------------")
         print("\n")

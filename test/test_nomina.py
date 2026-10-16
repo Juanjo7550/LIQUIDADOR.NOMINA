@@ -190,7 +190,11 @@ class TestsLiquidacionNomina(unittest.TestCase):
         el salario mínimo, trabajando el mes completo sin horas
         extra ni recargos.
         """
-        resultado = logica_nomina.liquidar_nomina(salario_base=1_423_500, dias_trabajados=30)
+        datos_empleado = logica_nomina.Empleado(
+            salario_base=1_423_500,
+            dias_trabajados=30
+        )
+        resultado = logica_nomina.liquidar_nomina(datos_empleado=datos_empleado)
 
         self.assertEqual(resultado["salario_proporcional"], 1_423_500)
         self.assertEqual(resultado["auxilio_transporte"], 200_000)
@@ -204,12 +208,13 @@ class TestsLiquidacionNomina(unittest.TestCase):
         superior al mínimo que trabajó horas extra diurnas y
         recargo nocturno durante el mes completo.
         """
-        resultado = logica_nomina.liquidar_nomina(
+        datos_empleado = logica_nomina.Empleado(
             salario_base=3_500_000,
             dias_trabajados=30,
             horas_extra_diurnas=4,
             horas_recargo_nocturno=10,
         )
+        resultado = logica_nomina.liquidar_nomina(datos_empleado=datos_empleado)
 
         valor_hora = 3_500_000 / 220
         hed_esperado = round(valor_hora * 1.25 * 4, 2)
@@ -225,7 +230,11 @@ class TestsLiquidacionNomina(unittest.TestCase):
         laboró 15 días del mes, comprobando que el salario y el
         auxilio de transporte se liquiden de forma proporcional.
         """
-        resultado = logica_nomina.liquidar_nomina(salario_base=1_423_500, dias_trabajados=15)
+        datos_empleado = logica_nomina.Empleado(
+            salario_base=1_423_500,
+            dias_trabajados=15
+        )
+        resultado = logica_nomina.liquidar_nomina(datos_empleado=datos_empleado)
 
         salario_esperado = round((1_423_500 / 30) * 15, 2)
         auxilio_esperado = round(200_000 * (15 / 30), 2)
@@ -239,7 +248,11 @@ class TestsLiquidacionNomina(unittest.TestCase):
         (cesantías, intereses de cesantías, prima y vacaciones) se
         calculen correctamente dentro de la liquidación completa.
         """
-        resultado = logica_nomina.liquidar_nomina(salario_base=1_423_500, dias_trabajados=30)
+        datos_empleado = logica_nomina.Empleado(
+            salario_base=1_423_500,
+            dias_trabajados=30
+        )
+        resultado = logica_nomina.liquidar_nomina(datos_empleado=datos_empleado)
         provisiones = resultado["provisiones_prestacionales"]
 
         ibc = resultado["ibc"]
@@ -261,8 +274,12 @@ class TestsLiquidacionNomina(unittest.TestCase):
         Prueba encargada de verificar que la nómina NO sea liquidada
         debido a que el SALARIO BASE ES IGUAL A CERO.
         """
+        datos_empleado = logica_nomina.Empleado(
+            salario_base=0,
+            dias_trabajados=30
+        )
         with self.assertRaises(logica_nomina.SalarioInvalido):
-            logica_nomina.liquidar_nomina(salario_base=0, dias_trabajados=30)
+            logica_nomina.liquidar_nomina(datos_empleado=datos_empleado)
 
     # ERROR 2 - SALARIO BASE NEGATIVO
     def test_error_salario_base_negativo(self):
@@ -270,8 +287,12 @@ class TestsLiquidacionNomina(unittest.TestCase):
         Prueba encargada de verificar que la nómina NO sea liquidada
         debido a que el SALARIO BASE ES NEGATIVO.
         """
+        datos_empleado = logica_nomina.Empleado(
+            salario_base=-1_423_500,
+            dias_trabajados=30
+        )
         with self.assertRaises(logica_nomina.SalarioInvalido):
-            logica_nomina.liquidar_nomina(salario_base=-1_423_500, dias_trabajados=30)
+            logica_nomina.liquidar_nomina(datos_empleado=datos_empleado )
 
     # ERROR 3 - HORAS EXTRA NEGATIVAS
     def test_error_horas_extra_negativas(self):
@@ -280,10 +301,16 @@ class TestsLiquidacionNomina(unittest.TestCase):
         debido a que se ingresó una cantidad de HORAS EXTRA
         NEGATIVA.
         """
+        datos_empleado = logica_nomina.Empleado(
+            salario_base=1_423_500,
+            dias_trabajados=30,
+            horas_extra_diurnas=-2
+        )
         with self.assertRaises(logica_nomina.HorasInvalidas):
-            logica_nomina.liquidar_nomina(
-                salario_base=1_423_500, dias_trabajados=30, horas_extra_diurnas=-4
-            )
+            logica_nomina.liquidar_nomina(datos_empleado=datos_empleado)
+            
+            
+        
 
     # ERROR 4 - DÍAS TRABAJADOS FUERA DE RANGO
     def test_error_dias_trabajados_fuera_de_rango(self):
@@ -292,8 +319,12 @@ class TestsLiquidacionNomina(unittest.TestCase):
         debido a que los DÍAS TRABAJADOS SUPERAN EL MÁXIMO PERMITIDO
         (30 días).
         """
+        datos_empleado = logica_nomina.Empleado(
+            salario_base=1_423_500,
+            dias_trabajados=35
+        )   
         with self.assertRaises(logica_nomina.DiasInvalidos):
-            logica_nomina.liquidar_nomina(salario_base=1_423_500, dias_trabajados=35)
+            logica_nomina.liquidar_nomina(datos_empleado=datos_empleado)
 
     # ------------------------------------------------------------
     # CASOS DE PRUEBA EXTRAORDINARIOS
@@ -306,7 +337,11 @@ class TestsLiquidacionNomina(unittest.TestCase):
         reciba auxilio de transporte, aunque el resto de la
         liquidación se calcule con normalidad.
         """
-        resultado = logica_nomina.liquidar_nomina(salario_base=15_000_000, dias_trabajados=30)
+        datos_empleado = logica_nomina.Empleado(
+            salario_base=15_000_000,
+            dias_trabajados=30
+        )
+        resultado = logica_nomina.liquidar_nomina(datos_empleado=datos_empleado)
 
         self.assertEqual(resultado["auxilio_transporte"], 0)
         self.assertGreater(resultado["total_devengado"], 0)
@@ -320,7 +355,7 @@ class TestsLiquidacionNomina(unittest.TestCase):
         DOMINICALES NOCTURNAS, RECARGO NOCTURNO Y RECARGO
         DOMINICAL/FESTIVO simultáneamente.
         """
-        resultado = logica_nomina.liquidar_nomina(
+        datos_empleado = logica_nomina.Empleado(
             salario_base=1_423_500,
             dias_trabajados=30,
             horas_extra_diurnas=2,
@@ -330,7 +365,7 @@ class TestsLiquidacionNomina(unittest.TestCase):
             horas_recargo_nocturno=5,
             horas_recargo_dominical_festivo=5,
         )
-
+        resultado = logica_nomina.liquidar_nomina(datos_empleado=datos_empleado)
         total_extra_y_recargos = (
             resultado["hora_extra_diurna"]
             + resultado["hora_extra_nocturna"]
@@ -360,7 +395,11 @@ class TestsLiquidacionNomina(unittest.TestCase):
         genere un error, ya que 0 es un valor válido dentro del rango
         permitido (0 a 30 días).
         """
-        resultado = logica_nomina.liquidar_nomina(salario_base=1_423_500, dias_trabajados=0)
+        datos_empleado = logica_nomina.Empleado(
+            salario_base=1_423_500,
+            dias_trabajados=0
+        )
+        resultado = logica_nomina.liquidar_nomina(datos_empleado=datos_empleado)
 
         self.assertEqual(resultado["salario_proporcional"], 0)
         self.assertEqual(resultado["auxilio_transporte"], 0)
