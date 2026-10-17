@@ -149,27 +149,28 @@ Se prueba el sistema con un trabajador que no laboró ningún día del periodo, 
 
 # 📂 Estructura del repositorio
 
-El proyecto está organizado dentro de la carpeta principal `NOMINA_COL`, donde se encuentra el código fuente del sistema, siguiendo el patrón **Model - View** con pruebas unitarias separadas.
+El proyecto sigue el patrón **Model - View - Controller**, con pruebas unitarias separadas.
 
 ```
-NOMINA_COL/
+LIQUIDADOR.NOMINA/
 │
 ├── 📄 README.md
-│   └── Documentación general del proyecto
+├── 🖥️ app.py                     → Interfaz gráfica (Kivy): insertar, buscar y calcular
+├── 🔑 secret_config_sample.py    → Plantilla de los datos de conexión (copiar como secret_config.py)
 │
-└── 📁 src/
-    │
-    ├── 🧠 model/
-    │   ├── __init__.py
-    │   └── logica_nomina.py
-    │
-    ├── 🧪 test/
-    │   ├── __init__.py
-    │   └── test_nomina.py
-    │
-    └── 🖥️ view/
-        ├── __init__.py
-        └── consola_nomina.py
+├── 🗄️ sql/                       → Scripts SQL de referencia (crear, borrar, insertar, buscar)
+│
+├── 📁 src/
+│   ├── 🧠 model/
+│   │   └── logica_nomina.py      → Clase Empleado y lógica de nómina
+│   ├── 🔌 controller/
+│   │   └── trabajadores_controller.py → Crear/borrar tabla, insertar, buscar y borrar en la BD
+│   └── 🖥️ view/
+│       └── consola_nomina.py     → Interfaz de consola del cálculo de nómina
+│
+└── 🧪 test/
+    ├── test_nomina.py            → Pruebas de la lógica de nómina
+    └── test_trabajadores_controller.py → Pruebas del controlador con la base de datos
 ```
 
 ## 📄 README.md
@@ -253,68 +254,73 @@ El proyecto se desarrolló siguiendo el siguiente proceso:
 
 # ▶️ Ejecución del proyecto y pruebas
 
-Para ejecutar el proyecto y comprobar el funcionamiento de las pruebas, otra persona puede descargar o clonar el repositorio y seguir los siguientes pasos.
+La aplicación guarda los empleados en una base de datos **PostgreSQL** (por ejemplo, una base de datos gratuita en [Render](https://render.com)) usando `psycopg2`, y tiene una interfaz gráfica hecha con **Kivy**.
 
-## 1️⃣ Clonar el repositorio
-
-Desde una terminal se debe ejecutar:
+## 1️⃣ Clonar el repositorio e instalar dependencias
 
 ```
 git clone URL_DEL_REPOSITORIO
+cd LIQUIDADOR.NOMINA
+python -m venv .venv
+.venv\Scripts\activate        (en Linux/Mac: source .venv/bin/activate)
+pip install psycopg2-binary kivy
 ```
 
-Luego ingresar a la carpeta raíz del proyecto (la que contiene la carpeta `NOMINA_COL`).
+## 2️⃣ Crear la base de datos
 
-## 2️⃣ Verificar la estructura del proyecto
+1. Cree una base de datos PostgreSQL (en Render: *New → PostgreSQL*, y copie los datos de la sección *Connections*: host, puerto, nombre de la base de datos, usuario y contraseña).
+2. No hace falta crear la tabla a mano: el controlador la crea con el método `crear_tabla()` (ver paso 4). Si se prefiere, también se puede ejecutar el script `sql/crear_trabajadores.sql` desde un cliente SQL como DBeaver o pgAdmin.
 
-Dentro de la carpeta raíz se encontrará la carpeta `NOMINA_COL`, que contiene las diferentes partes del sistema:
+## 3️⃣ Configurar la conexión
 
-```
-NOMINA_COL/
-│
-├── README.md
-│
-└── src/
-    ├── model/
-    ├── test/
-    └── view/
-```
+Los datos de conexión **no** se guardan en el código. Se leen del archivo `secret_config.py`, que está en `.gitignore` y no se sube al repositorio.
 
-## 3️⃣ Ejecutar las pruebas
+1. Copie `secret_config_sample.py` y renombre la copia como `secret_config.py` (en la carpeta raíz del proyecto).
+2. Reemplace en `secret_config.py` los valores de ejemplo por los datos reales de su base de datos.
 
-Las pruebas unitarias se encuentran dentro de:
+## 4️⃣ Crear (o borrar) la tabla
+
+Desde la carpeta raíz del proyecto:
 
 ```
-NOMINA_COL/src/test/test_nomina.py
+python -c "import sys; sys.path.append('src'); from controller.trabajadores_controller import Trabajadorescontroller; Trabajadorescontroller().crear_tabla()"
 ```
 
-Para ejecutarlas desde la terminal, ubicándose en la **carpeta raíz del proyecto** (la que contiene `NOMINA_COL`), se puede utilizar:
+Para borrar la tabla con todos sus datos, cambie `crear_tabla()` por `borrar_tabla()`.
+
+## 5️⃣ Ejecutar el programa
+
+Desde la carpeta raíz del proyecto:
 
 ```
-python -m unittest discover -s NOMINA_COL/src/test
+python app.py
 ```
 
-Este comando busca automáticamente las pruebas dentro de la carpeta `NOMINA_COL/src/test` y las ejecuta.
+En la ventana se ingresan el código, el nombre, el salario, los días trabajados y las horas extra/recargos:
 
-## 4️⃣ Resultado esperado
+* **Insertar**: guarda el empleado en la base de datos.
+* **Buscar**: busca por el código ingresado y llena el formulario con los datos guardados.
+* **Calcular**: muestra el neto a pagar.
+* **Limpiar**: borra el formulario.
 
-Al ejecutar las pruebas, el programa mostrará en la terminal el resultado de las 23 pruebas realizadas (casos reales, casos de error y casos extraordinarios). Si todas las pruebas funcionan correctamente, se mostrará `OK` al final de la ejecución.
-
-## 🖥️ Ejecución de la aplicación
-
-Además de las pruebas unitarias, el proyecto cuenta con una interfaz de consola ubicada en:
-
-```
-NOMINA_COL/src/view/consola_nomina.py
-```
-
-Para ejecutarla, ubicándose en la **carpeta raíz del proyecto**, se puede utilizar:
+También existe una versión de consola del cálculo de nómina (sin base de datos):
 
 ```
-python NOMINA_COL/src/view/consola_nomina.py
+python src/view/consola_nomina.py
 ```
 
-Esta parte permite interactuar con el sistema mediante la consola, ingresar el salario base, los días trabajados y las horas extra/recargos, y obtener el detalle completo de la liquidación de nómina.
+## 6️⃣ Ejecutar las pruebas
+
+Desde la carpeta raíz del proyecto:
+
+```
+python -m unittest discover -s test -t .
+```
+
+* `test/test_nomina.py`: 23 pruebas de la lógica de nómina.
+* `test/test_trabajadores_controller.py`: 10 pruebas del controlador contra la base de datos (insertar, buscar, borrar y crear/borrar la tabla, con casos normales y de error). Antes de cada prueba se borra y se vuelve a crear la tabla `Empleado` (fixtures `setUp` / `tearDown`), así que **las pruebas borran los datos de esa tabla**.
+
+Si todo funciona correctamente, se mostrará `OK` al final de la ejecución.
 
 ---
 

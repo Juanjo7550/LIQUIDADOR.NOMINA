@@ -4,6 +4,7 @@ from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.popup import Popup
 
 import sys
@@ -11,93 +12,166 @@ import sys
 sys.path.append("src")
 
 # Lógica de la nómina
+from model import logica_nomina
 from model.logica_nomina import liquidar_nomina
+
+# Acceso a la base de datos
+from controller.trabajadores_controller import Trabajadorescontroller
+
+
+# Campos numéricos del formulario: (atributo de Empleado, etiqueta, tipo)
+CAMPOS_NUMERICOS = [
+    ("salario_base", "Salario base", float),
+    ("dias_trabajados", "Días trabajados", int),
+    ("horas_extra_diurnas", "Horas extra diurnas", float),
+    ("horas_extra_nocturnas", "Horas extra nocturnas", float),
+    ("horas_extra_dominicales_diurnas", "Horas extra dominicales diurnas", float),
+    ("horas_extra_dominicales_nocturnas", "Horas extra dominicales nocturnas", float),
+    ("horas_recargo_nocturno", "Horas recargo nocturno", float),
+    ("horas_recargo_dominical_festivo", "Horas recargo dominical/festivo", float),
+]
+
+# Longitudes máximas según la tabla Empleado (sql/crear_trabajadores.sql)
+MAX_CODIGO = 10
+MAX_NOMBRE = 20
 
 
 class PaymentApp(App):
 
     def build(self):
-        contenedor = GridLayout(
-            cols=2,
+        self.controlador = Trabajadorescontroller()
+
+        principal = BoxLayout(
+            orientation="vertical",
             padding=20,
-            spacing=20
+            spacing=10
+        )
+
+        formulario = GridLayout(
+            cols=2,
+            spacing=10
         )
 
         # -----------------------------
-        # SALARIO BASE
+        # CÓDIGO Y NOMBRE
         # -----------------------------
-        contenedor.add_widget(
-            Label(text="Salario base")
-        )
-
-        self.salario = TextInput(
-            font_size=30,
-            multiline=False
-        )
-
-        contenedor.add_widget(self.salario)
+        self.codigo = self.agregar_campo(formulario, "Código empleado")
+        self.nombre = self.agregar_campo(formulario, "Nombre")
 
         # -----------------------------
-        # DÍAS TRABAJADOS
+        # SALARIO, DÍAS, HORAS
         # -----------------------------
-        contenedor.add_widget(
-            Label(text="Días trabajados")
-        )
+        self.campos = {}
 
-        self.dias = TextInput(
-            font_size=30,
-            multiline=False
-        )
-
-        contenedor.add_widget(self.dias)
-
-        # -----------------------------
-        # HORAS EXTRA DIURNAS
-        # -----------------------------
-        contenedor.add_widget(
-            Label(text="Horas extra diurnas")
-        )
-
-        self.horas_extra_diurnas = TextInput(
-            font_size=30,
-            multiline=False
-        )
-
-        contenedor.add_widget(
-            self.horas_extra_diurnas
-        )
+        for atributo, etiqueta, _ in CAMPOS_NUMERICOS:
+            self.campos[atributo] = self.agregar_campo(formulario, etiqueta)
 
         # -----------------------------
         # RESULTADO
         # -----------------------------
-        contenedor.add_widget(
+        formulario.add_widget(
             Label(text="Neto a pagar")
         )
 
         self.resultado = Label(
             text="0",
-            font_size=25
+            font_size=22
         )
 
-        contenedor.add_widget(self.resultado)
+        formulario.add_widget(self.resultado)
+
+        principal.add_widget(formulario)
 
         # -----------------------------
-        # BOTÓN CALCULAR
+        # BOTONES
         # -----------------------------
-        calcular = Button(
-            text="Calcular",
-            font_size=40
+        botones = BoxLayout(
+            spacing=10,
+            size_hint_y=None,
+            height=60
         )
 
-        contenedor.add_widget(calcular)
+        for texto, accion in [
+            ("Buscar", self.buscar_empleado),
+            ("Insertar", self.insertar_empleado),
+            ("Calcular", self.calcular_nomina),
+            ("Limpiar", self.limpiar),
+        ]:
+            boton = Button(
+                text=texto,
+                font_size=24
+            )
+            boton.bind(on_press=accion)
+            botones.add_widget(boton)
 
-        # Conectar el botón con el método
-        calcular.bind(
-            on_press=self.calcular_nomina
-        )
+        principal.add_widget(botones)
 
         # Retornamos el contenedor principal
-        return contenedor
+        return principal
+
+    def agregar_campo(self, contenedor, etiqueta):
+        """
+        Agrega una etiqueta y su caja de texto
+        al formulario, y retorna la caja.
+        """
+
+        contenedor.add_widget(
+            Label(text=etiqueta)
+        )
+
+        campo = TextInput(
+            font_size=20,
+            multiline=False
+        )
+
+        contenedor.add_widget(campo)
+
+        return campo
+
+    # -----------------------------
+    # ACCIONES DE LOS BOTONES
+    # -----------------------------
+
+    def buscar_empleado(self, value):
+        """
+        Busca en la base de datos el empleado
+        con el código ingresado y llena el formulario.
+        """
+
+        try:
+            codigo = self.codigo.text.strip()
+
+            if not codigo:
+                raise Exception(
+                    "Ingrese el código del empleado a buscar."
+                )
+
+            empleado = self.controlador.buscar_empleado(codigo)
+
+            self.mostrar_empleado(empleado)
+            self.calcular_nomina(value)
+
+        except Exception as err:
+            self.mostrar_error(err)
+
+    def insertar_empleado(self, value):
+        """
+        Valida los datos del formulario y guarda
+        el empleado en la base de datos.
+        """
+
+        try:
+            empleado = self.leer_empleado()
+
+            self.controlador.insertar(empleado)
+
+            self.mostrar_mensaje(
+                "Empleado guardado",
+                f"Se insertó el empleado {empleado.codigo_empleado}."
+            )
+
+        except Exception as err:
+            self.mostrar_error(err)
 
     def calcular_nomina(self, value):
         """
@@ -106,110 +180,142 @@ class PaymentApp(App):
         """
 
         try:
-            # Validamos los datos
-            self.validar()
-
-            # Convertimos los valores
-            salario = float(self.salario.text)
-            dias = int(self.dias.text)
-            horas_extra = float(
-                self.horas_extra_diurnas.text
+            empleado = self.leer_empleado(
+                requiere_identificacion=False
             )
 
             # Ejecutamos la lógica de nómina
-            resultado = liquidar_nomina(
-                salario_base=salario,
-                dias_trabajados=dias,
-                horas_extra_diurnas=horas_extra
-            )
+            resultado = liquidar_nomina(empleado)
 
             # Mostramos el resultado
             self.resultado.text = (
                 f"${resultado['neto_a_pagar']:,.2f}"
             )
 
-        except ValueError:
-            self.resultado.text = (
-                "Error: ingrese valores numéricos válidos."
-            )
-
         except Exception as err:
             self.mostrar_error(err)
 
-    def validar(self):
+    def limpiar(self, value):
         """
-        Verifica que los datos ingresados
-        sean correctos.
+        Borra todos los campos del formulario.
         """
 
-        salario = self.salario.text.strip()
-        dias = self.dias.text.strip()
-        horas_extra = self.horas_extra_diurnas.text.strip()
+        self.codigo.text = ""
+        self.nombre.text = ""
+
+        for campo in self.campos.values():
+            campo.text = ""
+
+        self.resultado.text = "0"
+
+    # -----------------------------
+    # FORMULARIO <-> EMPLEADO
+    # -----------------------------
+
+    def leer_empleado(self, requiere_identificacion=True):
+        """
+        Valida los datos del formulario y
+        retorna un objeto Empleado.
+        """
+
+        codigo = self.codigo.text.strip()
+        nombre = self.nombre.text.strip()
 
         # --------------------------------
-        # Validar salario
+        # Validar código y nombre
         # --------------------------------
-        if not salario:
-            raise Exception(
-                "Debe ingresar el salario base."
-            )
+        if requiere_identificacion:
+            if not codigo:
+                raise Exception(
+                    "Debe ingresar el código del empleado."
+                )
 
-        try:
-            salario_numero = float(salario)
-        except ValueError:
-            raise Exception(
-                "El salario debe ser un número válido."
-            )
+            if len(codigo) > MAX_CODIGO:
+                raise Exception(
+                    f"El código no puede tener más de {MAX_CODIGO} caracteres."
+                )
 
-        if salario_numero <= 0:
-            raise Exception(
-                "El salario debe ser mayor que cero."
-            )
+            if not nombre:
+                raise Exception(
+                    "Debe ingresar el nombre del empleado."
+                )
 
-        # --------------------------------
-        # Validar días
-        # --------------------------------
-        if not dias:
-            raise Exception(
-                "Debe ingresar los días trabajados."
-            )
-
-        try:
-            dias_numero = int(dias)
-        except ValueError:
-            raise Exception(
-                "Los días trabajados deben ser un número entero."
-            )
-
-        if dias_numero < 0 or dias_numero > 30:
-            raise Exception(
-                "Los días trabajados deben estar entre 0 y 30."
-            )
+            if len(nombre) > MAX_NOMBRE:
+                raise Exception(
+                    f"El nombre no puede tener más de {MAX_NOMBRE} caracteres."
+                )
 
         # --------------------------------
-        # Validar horas extra
+        # Validar salario, días y horas
         # --------------------------------
-        if not horas_extra:
-            raise Exception(
-                "Debe ingresar las horas extra diurnas."
+        valores = {}
+
+        for atributo, etiqueta, tipo in CAMPOS_NUMERICOS:
+            texto = self.campos[atributo].text.strip()
+
+            # Las horas son opcionales; vacío equivale a 0
+            if not texto:
+                if atributo in ("salario_base", "dias_trabajados"):
+                    raise Exception(
+                        f"Debe ingresar: {etiqueta}."
+                    )
+                texto = "0"
+
+            try:
+                valores[atributo] = tipo(texto)
+            except ValueError:
+                tipo_texto = "un número entero" if tipo is int else "un número válido"
+                raise Exception(
+                    f"{etiqueta} debe ser {tipo_texto}."
+                )
+
+        empleado = logica_nomina.Empleado(
+            codigo_empleado=codigo,
+            nombre=nombre,
+            **valores
+        )
+
+        # Reutilizamos las validaciones del modelo
+        logica_nomina.verificar_salario(empleado.salario_base)
+        logica_nomina.verificar_dias(empleado.dias_trabajados)
+
+        for atributo, etiqueta, _ in CAMPOS_NUMERICOS[2:]:
+            logica_nomina.verificar_horas(
+                getattr(empleado, atributo),
+                etiqueta.lower()
             )
 
-        try:
-            horas_numero = float(horas_extra)
-        except ValueError:
-            raise Exception(
-                "Las horas extra deben ser un número válido."
-            )
+        return empleado
 
-        if horas_numero < 0:
-            raise Exception(
-                "Las horas extra no pueden ser negativas."
-            )
+    def mostrar_empleado(self, empleado):
+        """
+        Llena el formulario con los datos
+        de un empleado.
+        """
+
+        self.codigo.text = empleado.codigo_empleado
+        self.nombre.text = empleado.nombre
+
+        for atributo, _, tipo in CAMPOS_NUMERICOS:
+            valor = getattr(empleado, atributo)
+            self.campos[atributo].text = str(tipo(valor))
+
+    # -----------------------------
+    # VENTANAS EMERGENTES
+    # -----------------------------
 
     def mostrar_error(self, err):
         """
         Abre una ventana emergente con
         el mensaje de error.
+        """
+
+        self.mostrar_mensaje("Error", str(err))
+
+    def mostrar_mensaje(self, titulo, mensaje):
+        """
+        Abre una ventana emergente con
+        un título y un mensaje.
         """
 
         contenido = GridLayout(
@@ -218,9 +324,14 @@ class PaymentApp(App):
             spacing=10
         )
 
-        contenido.add_widget(
-            Label(text=str(err))
+        texto = Label(text=mensaje)
+
+        # Ajusta el texto largo al ancho de la ventana
+        texto.bind(
+            width=lambda label, ancho: setattr(label, "text_size", (ancho, None))
         )
+
+        contenido.add_widget(texto)
 
         cerrar = Button(
             text="Cerrar"
@@ -229,7 +340,7 @@ class PaymentApp(App):
         contenido.add_widget(cerrar)
 
         popup = Popup(
-            title="Error",
+            title=titulo,
             content=contenido,
             size_hint=(0.8, 0.4)
         )

@@ -1,1 +1,4 @@
 doc/0730.mov
+.venv/
+__pycache__/
+secret_config.py
