@@ -326,7 +326,7 @@ Si todo funciona correctamente, se mostrará `OK` al final de la ejecución.
 
 ## 👥 Autores
 
-**[David Rios Arias ,	Juan José García]**
+**[Pedro José Hernandez ,	Juan José García]**
 
 ## 👥 Editor
 
