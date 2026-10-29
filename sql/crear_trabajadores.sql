@@ -8,5 +8,6 @@ CREATE TABLE IF NOT EXISTS Empleado(
     horas_extra_dominicales_diurnas DECIMAL(10,2) DEFAULT 0,
     horas_extra_dominicales_nocturnas DECIMAL(10,2) DEFAULT 0,
     horas_recargo_nocturno DECIMAL(10,2) DEFAULT 0,
-    horas_recargo_dominical_festivo DECIMAL(10,2) DEFAULT 0
+    horas_recargo_dominical_festivo DECIMAL(10,2) DEFAULT 0,
+    Neto_a_pagar DECIMAL(20,3) DEFAULT 0
 );

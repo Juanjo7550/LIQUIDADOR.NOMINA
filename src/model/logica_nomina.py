@@ -250,7 +250,7 @@ class Empleado:
     def __init__(self, codigo_empleado: str="", nombre: str = "", salario_base: float = 0, dias_trabajados: int = 0,
                  horas_extra_diurnas: float = 0, horas_extra_nocturnas: float = 0,
                  horas_extra_dominicales_diurnas: float = 0, horas_extra_dominicales_nocturnas: float = 0,
-                 horas_recargo_nocturno: float = 0, horas_recargo_dominical_festivo: float = 0,horas_mes: int = HORAS_MES_LEGAL):
+                 horas_recargo_nocturno: float = 0, horas_recargo_dominical_festivo: float = 0,horas_mes: int = HORAS_MES_LEGAL,neto_a_pagar : float = 0):
         self.nombre = nombre
         self.codigo_empleado = codigo_empleado
         self.salario_base = salario_base
@@ -262,6 +262,7 @@ class Empleado:
         self.horas_recargo_nocturno = horas_recargo_nocturno
         self.horas_recargo_dominical_festivo = horas_recargo_dominical_festivo
         self.horas_mes = horas_mes
+        self.neto_a_pagar = neto_a_pagar
 
 def liquidar_nomina(
     datos_empleado: Empleado

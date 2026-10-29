@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+
+</head>
+
+<body>
+       
+    <form action="/buscar_empleado">
+        <h1>
+            Buscar datos del empleado
+        </h1>
+
+        <p>
+            Codigo empleado = <input type = "text" name="codigo_empleado" />
+        </p>
+
+        <input type="submit" value="Buscar empleado" />
+
+
+
+
+
+
+    </form>
+
+    <form action="/guardar_empleado">
+        <h1>Liquidador de nomina empleados</h1>
+        <p>
+            Ingrese los datos del empleado al que se le esta liquidando la nomina 
+        </p>
+        <div>
+            Codigo empleado = <input type = "text" name="codigo_empleado" />
+        </div>
+        <div>
+            Nombre = <input type = "text" name="nombre" />
+        </div>
+        <div>
+            Salario base = <input type="number" name="salario_base" />
+        </div>
+        <div>
+            Dias trabajados = <input type="number" name="dias_trabajados" />
+        </div>
+        <div>
+            Horas extra diurnas = <input type="number" name="horas_extra_diurnas" />
+        </div>
+        <div>
+            Hora extra nocturnas = <input type="number" name="horas_extra_nocturnas" />
+        </div>
+        <div>
+            Horas extra dominicales diurnas = <input type="number" name="horas_extra_dominicales_diurnas" />
+        </div>
+        <div>
+            Horas extra dominicales nocturnas = <input type="number" name="horas_extra_dominicales_nocturnas" />
+        </div>
+        <div>
+            Horas recargo nocturno = <input type="number" name="horas_recargo_nocturno" />
+        </div>
+        <div>
+            Horas recargo dominical festivo = <input type="number" name="horas_recargo_dominical_festivo" />
+        </div>
+        <input type="submit" value="Liquidar Nomina y Guardar" />
+    </form>
+
+
+</body>
+
+</html>
