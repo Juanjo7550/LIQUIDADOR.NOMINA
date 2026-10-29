@@ -1,95 +1,80 @@
-<table>
-    <tbody>
-        <tr>
-            <th>
-                Codigo empleado
-            </th>
-            <td>
-                {{empleado.codigo_empleado}}
-            </td>
-        </tr> 
-        <tr> 
-            <th>
-                Nombre
-            </th>  
-            <td>
-                {{empleado.nombre}}
-            </td>
-        </tr>
-        <tr>
-            <th>
-                Salario base
-            </th>
-            <td>
-                {{empleado.salario_base}}
-            </td>
-        </tr>
-        <tr>
-            <th>
-                Dias trabajados
-            </th>
-            <td>
-                {{empleado.dias_trabajados}}
-            </td>
-        </tr>
-        <tr>
-            <th>
-                Horas extra diurnas
-            </th>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado de la liquidación</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
+</head>
 
-            <td>
-                {{empleado.horas_extra_diurnas}}
-            </td>
-        </tr>
-        <tr>
-            <th>
-                Hora extra nocturnas
-            </th>    
-            <td>
-                {{empleado.hora_extra_nocturnas}}
-            </td>
-        </tr>
-        <tr>
-            <th>
-                Horas extra dominicales diurnas
-            </th>
-            <td>
-                {{empleado.horas_extra_dominicales_diurnas}}
-            </td>
-        </tr>
-        <tr>
-            <th>
-                Horas extra dominicales nocturnas
-            </th>
-            <td>
-                {{empleado.horas_extra_dominicales_nocturnas}}
-            </td>
-        </tr>
-        <tr>
-            <th>
-                Horas recargo nocturno
-            </th>
-            <td>
-                {{empleado.horas_recargo_nocturno}}
-            </td>
-        </tr>
-        <tr>
-            <th>
-                Horas recargo dominical festivo
-            </th>
-            <td>
-                {{empleado.horas_recargo_dominical_festivo}}
-            </td>
+<body>
+    <header class="encabezado">
+        <div class="contenido">
+            <div class="logo">💼</div>
+            <div>
+                <h1>Liquidador de nómina</h1>
+                <p>Resultado de la liquidación</p>
+            </div>
+        </div>
+    </header>
 
-        </tr>
-        <tr>
-            <th>
-                Neto a pagar
-            </th>
-            <td>
-                {{empleado.neto_a_pagar}}
-            </td>
-        </tr>
-    </tbody>
-    
-</table>
+    <main class="una-columna">
+        <section class="tarjeta">
+            <div class="aviso-exito">✅ Nómina liquidada y guardada correctamente.</div>
+
+            <h2>🧾 {{ empleado.nombre }}</h2>
+            <p class="descripcion">Código de empleado: <strong>{{ empleado.codigo_empleado }}</strong></p>
+
+            <div class="total">
+                <span>Neto a pagar</span>
+                <strong>$ {{ "{:,.2f}".format(empleado.neto_a_pagar) }}</strong>
+            </div>
+
+            <table class="tabla-resultado">
+                <tbody>
+                    <tr class="seccion"><th colspan="2">Datos básicos</th></tr>
+                    <tr>
+                        <th>Salario base</th>
+                        <td>$ {{ "{:,.2f}".format(empleado.salario_base) }}</td>
+                    </tr>
+                    <tr>
+                        <th>Días trabajados</th>
+                        <td>{{ empleado.dias_trabajados }}</td>
+                    </tr>
+
+                    <tr class="seccion"><th colspan="2">Horas extra y recargos</th></tr>
+                    <tr>
+                        <th>Horas extra diurnas</th>
+                        <td>{{ empleado.horas_extra_diurnas }}</td>
+                    </tr>
+                    <tr>
+                        <th>Horas extra nocturnas</th>
+                        <td>{{ empleado.horas_extra_nocturnas }}</td>
+                    </tr>
+                    <tr>
+                        <th>Horas extra dominicales diurnas</th>
+                        <td>{{ empleado.horas_extra_dominicales_diurnas }}</td>
+                    </tr>
+                    <tr>
+                        <th>Horas extra dominicales nocturnas</th>
+                        <td>{{ empleado.horas_extra_dominicales_nocturnas }}</td>
+                    </tr>
+                    <tr>
+                        <th>Horas recargo nocturno</th>
+                        <td>{{ empleado.horas_recargo_nocturno }}</td>
+                    </tr>
+                    <tr>
+                        <th>Horas recargo dominical festivo</th>
+                        <td>{{ empleado.horas_recargo_dominical_festivo }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <a href="/" class="boton secundario">← Liquidar otro empleado</a>
+        </section>
+    </main>
+
+    <footer>Liquidador de nómina · Proyecto académico</footer>
+</body>
+
+</html>

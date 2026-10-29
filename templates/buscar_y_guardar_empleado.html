@@ -1,69 +1,101 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liquidador de Nómina</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
 </head>
 
 <body>
-       
-    <form action="/buscar_empleado">
-        <h1>
-            Buscar datos del empleado
-        </h1>
-
-        <p>
-            Codigo empleado = <input type = "text" name="codigo_empleado" />
-        </p>
-
-        <input type="submit" value="Buscar empleado" />
-
-
-
-
-
-
-    </form>
-
-    <form action="/guardar_empleado">
-        <h1>Liquidador de nomina empleados</h1>
-        <p>
-            Ingrese los datos del empleado al que se le esta liquidando la nomina 
-        </p>
-        <div>
-            Codigo empleado = <input type = "text" name="codigo_empleado" />
+    <header class="encabezado">
+        <div class="contenido">
+            <div class="logo">💼</div>
+            <div>
+                <h1>Liquidador de nómina</h1>
+                <p>Calcula, guarda y consulta la nómina de tus empleados</p>
+            </div>
         </div>
-        <div>
-            Nombre = <input type = "text" name="nombre" />
-        </div>
-        <div>
-            Salario base = <input type="number" name="salario_base" />
-        </div>
-        <div>
-            Dias trabajados = <input type="number" name="dias_trabajados" />
-        </div>
-        <div>
-            Horas extra diurnas = <input type="number" name="horas_extra_diurnas" />
-        </div>
-        <div>
-            Hora extra nocturnas = <input type="number" name="horas_extra_nocturnas" />
-        </div>
-        <div>
-            Horas extra dominicales diurnas = <input type="number" name="horas_extra_dominicales_diurnas" />
-        </div>
-        <div>
-            Horas extra dominicales nocturnas = <input type="number" name="horas_extra_dominicales_nocturnas" />
-        </div>
-        <div>
-            Horas recargo nocturno = <input type="number" name="horas_recargo_nocturno" />
-        </div>
-        <div>
-            Horas recargo dominical festivo = <input type="number" name="horas_recargo_dominical_festivo" />
-        </div>
-        <input type="submit" value="Liquidar Nomina y Guardar" />
-    </form>
+    </header>
 
+    <main>
+        <section class="tarjeta">
+            <h2>🔍 Buscar empleado</h2>
+            <p class="descripcion">Consulta los datos de un empleado ya registrado.</p>
 
+            <form action="/buscar_empleado">
+                <div class="campo">
+                    <label for="buscar_codigo">Código del empleado</label>
+                    <input type="text" id="buscar_codigo" name="codigo_empleado" placeholder="Ej: E001" required />
+                </div>
+                <br>
+                <button type="submit" class="boton">Buscar empleado</button>
+            </form>
+        </section>
+
+        <section class="tarjeta">
+            <h2>🧾 Liquidar nómina</h2>
+            <p class="descripcion">Ingrese los datos del empleado al que se le está liquidando la nómina.</p>
+
+            <form action="/guardar_empleado">
+                <fieldset>
+                    <legend>Datos del empleado</legend>
+                    <div class="grupo-campos">
+                        <div class="campo">
+                            <label for="codigo_empleado">Código empleado</label>
+                            <input type="text" id="codigo_empleado" name="codigo_empleado" required />
+                        </div>
+                        <div class="campo">
+                            <label for="nombre">Nombre</label>
+                            <input type="text" id="nombre" name="nombre" required />
+                        </div>
+                        <div class="campo">
+                            <label for="salario_base">Salario base</label>
+                            <input type="number" id="salario_base" name="salario_base" min="0" step="any" placeholder="$" required />
+                        </div>
+                        <div class="campo">
+                            <label for="dias_trabajados">Días trabajados</label>
+                            <input type="number" id="dias_trabajados" name="dias_trabajados" min="0" max="30" step="any" required />
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Horas extra y recargos</legend>
+                    <div class="grupo-campos">
+                        <div class="campo">
+                            <label for="horas_extra_diurnas">Horas extra diurnas</label>
+                            <input type="number" id="horas_extra_diurnas" name="horas_extra_diurnas" min="0" step="any" placeholder="0" />
+                        </div>
+                        <div class="campo">
+                            <label for="horas_extra_nocturnas">Horas extra nocturnas</label>
+                            <input type="number" id="horas_extra_nocturnas" name="horas_extra_nocturnas" min="0" step="any" placeholder="0" />
+                        </div>
+                        <div class="campo">
+                            <label for="horas_extra_dominicales_diurnas">Horas extra dominicales diurnas</label>
+                            <input type="number" id="horas_extra_dominicales_diurnas" name="horas_extra_dominicales_diurnas" min="0" step="any" placeholder="0" />
+                        </div>
+                        <div class="campo">
+                            <label for="horas_extra_dominicales_nocturnas">Horas extra dominicales nocturnas</label>
+                            <input type="number" id="horas_extra_dominicales_nocturnas" name="horas_extra_dominicales_nocturnas" min="0" step="any" placeholder="0" />
+                        </div>
+                        <div class="campo">
+                            <label for="horas_recargo_nocturno">Horas recargo nocturno</label>
+                            <input type="number" id="horas_recargo_nocturno" name="horas_recargo_nocturno" min="0" step="any" placeholder="0" />
+                        </div>
+                        <div class="campo">
+                            <label for="horas_recargo_dominical_festivo">Horas recargo dominical festivo</label>
+                            <input type="number" id="horas_recargo_dominical_festivo" name="horas_recargo_dominical_festivo" min="0" step="any" placeholder="0" />
+                        </div>
+                    </div>
+                </fieldset>
+
+                <button type="submit" class="boton">Liquidar nómina y guardar</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>Liquidador de nómina · Proyecto académico</footer>
 </body>
 
 </html>
