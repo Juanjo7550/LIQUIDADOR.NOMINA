@@ -19,19 +19,28 @@
     </header>
 
     <main>
-        <section class="tarjeta">
-            <h2>🔍 Buscar empleado</h2>
-            <p class="descripcion">Consulta los datos de un empleado ya registrado.</p>
+        <div class="columna">
+            <section class="tarjeta">
+                <h2>🔍 Buscar empleado</h2>
+                <p class="descripcion">Consulta los datos de un empleado ya registrado.</p>
 
-            <form action="/buscar_empleado">
-                <div class="campo">
-                    <label for="buscar_codigo">Código del empleado</label>
-                    <input type="text" id="buscar_codigo" name="codigo_empleado" placeholder="Ej: E001" required />
-                </div>
-                <br>
-                <button type="submit" class="boton">Buscar empleado</button>
-            </form>
-        </section>
+                <form action="/buscar_empleado">
+                    <div class="campo">
+                        <label for="buscar_codigo">Código del empleado</label>
+                        <input type="text" id="buscar_codigo" name="codigo_empleado" placeholder="Ej: E001" required />
+                    </div>
+                    <br>
+                    <button type="submit" class="boton">Buscar empleado</button>
+                </form>
+            </section>
+
+            <section class="tarjeta">
+                <h2>🗄️ Base de datos</h2>
+                <p class="descripcion">Crea la tabla Empleado si aún no existe.</p>
+
+                <a href="/crear_tabla" class="boton secundario">Crear tabla Empleado</a>
+            </section>
+        </div>
 
         <section class="tarjeta">
             <h2>🧾 Liquidar nómina</h2>

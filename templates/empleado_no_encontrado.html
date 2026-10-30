@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empleado no encontrado</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
+</head>
+
+<body>
+    <header class="encabezado">
+        <div class="contenido">
+            <div class="logo">💼</div>
+            <div>
+                <h1>Liquidador de nómina</h1>
+                <p>Consulta de empleado</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="una-columna">
+        <section class="tarjeta">
+            <div class="aviso-error">❌ No existe un empleado registrado con el código ingresado.</div>
+
+            <h2>🔍 Empleado no encontrado</h2>
+            <p class="descripcion">Verifica el código e intenta nuevamente.</p>
+
+            <a href="/" class="boton">🔍 Buscar nuevamente</a>
+        </section>
+    </main>
+
+    <footer>Liquidador de nómina · Proyecto académico</footer>
+</body>
+
+</html>

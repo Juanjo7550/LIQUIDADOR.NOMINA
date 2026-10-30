@@ -77,9 +77,22 @@ class Trabajadorescontroller:
         finally:
             connection.close()
 
-    def crear_tabla(self):
-        """Crea la tabla Empleado si no existe"""
+    def tabla_existe(self) -> bool:
+        """Indica si la tabla Empleado ya existe en la base de datos"""
+        connection = self.conectar()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT to_regclass('empleado') IS NOT NULL")
+                return cursor.fetchone()[0]
+        finally:
+            connection.close()
+
+    def crear_tabla(self) -> bool:
+        """Crea la tabla Empleado. Devuelve True si la creó o False si ya existía"""
+        if self.tabla_existe():
+            return False
         self.ejecutar_sql(SQL_CREAR_TABLA)
+        return True
 
     def borrar_tabla(self):
         """Borra la tabla Empleado con todos sus datos"""

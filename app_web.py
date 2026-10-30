@@ -47,6 +47,20 @@ def guardar():
         return f"Error encontrado: {error}"
 
 
+@app.route("/crear_tabla")
+def crear_tabla():
+    try:
+        controlador = Trabajadorescontroller()
+        if controlador.crear_tabla():
+            return render_template("resultado_tabla.html", tipo="exito",
+                                   mensaje="✅ La tabla Empleado se creó correctamente.")
+        return render_template("resultado_tabla.html", tipo="info",
+                               mensaje="ℹ️ La tabla Empleado ya existe. No se realizó ningún cambio.")
+    except Exception as error:
+        return render_template("resultado_tabla.html", tipo="error",
+                               mensaje=f"❌ No se pudo crear la tabla: {error}")
+
+
 @app.route("/buscar_empleado")
 def bucar_empleado():
     
@@ -55,20 +69,9 @@ def bucar_empleado():
     try:
         controlador = Trabajadorescontroller()
         empleado_encontrado = controlador.buscar_empleado(codigo_empleado)
-        return f"""
-        <p> El codigo del trabajador es : {codigo_empleado} </p>
-        <p> El nombre del empleado es : {empleado_encontrado.nombre} </p>
-        <p> El salario base del empleado es : {empleado_encontrado.salario_base} </p>
-        <p> El empleado trabajo {empleado_encontrado.dias_trabajados} dias en el mes </p>
-        <p> El empleado tuvo {empleado_encontrado.horas_extra_diurnas} horas_extra_diurnas en el mes </p>
-        <p> El empleado tuvo {empleado_encontrado.horas_extra_nocturnas} horas_extra_nocturnas en el mes </p>
-        <p> El empleado tuvo {empleado_encontrado.horas_extra_dominicales_diurnas} horas_extra_dominicales_diurnas en el mes </p>
-        <p> El empleado tuvo {empleado_encontrado.horas_extra_dominicales_nocturnas} horas_extra_dominicales_nocturnas en el mes </p>
-        <p> El empleado tuvo {empleado_encontrado.horas_recargo_nocturno} horas_recargo_nocturno en el mes </p>
-        <p> El empleado tuvo {empleado_encontrado.horas_recargo_dominical_festivo} horas_recargo_dominical_festivo en el mes </p>
-        """
+        return render_template("empleado_encontrado.html", empleado = empleado_encontrado)
     except Exception as error:
-        return "El empleado no existe"
+        return render_template("empleado_no_encontrado.html")
 
 
 

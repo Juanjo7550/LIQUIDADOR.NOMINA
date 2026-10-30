@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear tabla Empleado</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
+</head>
+
+<body>
+    <header class="encabezado">
+        <div class="contenido">
+            <div class="logo">💼</div>
+            <div>
+                <h1>Liquidador de nómina</h1>
+                <p>Base de datos</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="una-columna">
+        <section class="tarjeta">
+            <h2>🗄️ Tabla Empleado</h2>
+            <p class="descripcion">Resultado de la creación de la tabla.</p>
+
+            <div class="aviso-{{ tipo }}">{{ mensaje }}</div>
+
+            <a href="/" class="boton secundario">← Volver al inicio</a>
+        </section>
+    </main>
+
+    <footer>Liquidador de nómina · Proyecto académico</footer>
+</body>
+
+</html>

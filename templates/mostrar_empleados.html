@@ -25,11 +25,6 @@
             <h2>🧾 {{ empleado.nombre }}</h2>
             <p class="descripcion">Código de empleado: <strong>{{ empleado.codigo_empleado }}</strong></p>
 
-            <div class="total">
-                <span>Neto a pagar</span>
-                <strong>$ {{ "{:,.2f}".format(empleado.neto_a_pagar) }}</strong>
-            </div>
-
             <table class="tabla-resultado">
                 <tbody>
                     <tr class="seccion"><th colspan="2">Datos básicos</th></tr>
