@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empleado ya registrado</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
+</head>
+
+<body>
+    <header class="encabezado">
+        <div class="contenido">
+            <div class="logo">💼</div>
+            <div>
+                <h1>Liquidador de nómina</h1>
+                <p>Liquidación de nómina</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="una-columna">
+        <section class="tarjeta">
+            <div class="aviso-error">⚠️ No se guardó la liquidación: el empleado ya existe.</div>
+
+            <h2>👤 Empleado ya registrado</h2>
+            <p class="descripcion">
+                Ya hay un empleado guardado con el código <strong>{{ codigo_empleado }}</strong>.
+                Usa un código diferente o consulta los datos del empleado existente.
+            </p>
+
+            <a href="/buscar_empleado?codigo_empleado={{ codigo_empleado | urlencode }}" class="boton">🔍 Ver empleado existente</a>
+            <a href="/" class="boton secundario">← Volver al inicio</a>
+        </section>
+    </main>
+
+    <footer>Liquidador de nómina · Proyecto académico</footer>
+</body>
+
+</html>

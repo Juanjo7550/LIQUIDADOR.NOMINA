@@ -308,10 +308,14 @@ footer {
         text-align: center;
     }
 }
-/* Columna izquierda con varias tarjetas */
-.columna { display: grid; gap: 24px; }
 
-/* Aviso informativo (tabla ya existe) */
+/* Columna izquierda con varias tarjetas */
+.columna {
+    display: grid;
+    gap: 24px;
+}
+
+/* Aviso informativo (por ejemplo: la tabla ya existe) */
 .aviso-info {
     display: flex;
     gap: 10px;
@@ -323,4 +327,9 @@ footer {
     color: #7a5a10;
     font-weight: 600;
     border-left: 5px solid var(--acento);
+}
+
+/* Separación entre botones apilados */
+.tarjeta .boton + .boton {
+    margin-top: 10px;
 }

@@ -62,6 +62,10 @@
                         <th>Horas recargo dominical festivo</th>
                         <td>{{ empleado.horas_recargo_dominical_festivo }}</td>
                     </tr>
+                    <tr>
+                        <th>Neto a pagar</th>
+                        <td>$ {{ "{:,.2f}".format(empleado.neto_a_pagar) }}</td>
+                    </tr>
                 </tbody>
             </table>
 
