@@ -155,10 +155,22 @@ El proyecto sigue el patrón **Model - View - Controller**, con pruebas unitaria
 LIQUIDADOR.NOMINA/
 │
 ├── 📄 README.md
-├── 🖥️ app.py                     → Interfaz gráfica (Kivy): insertar, buscar y calcular
+├── 🌐 app.py                     → Aplicación web (Flask): menú de inicio, crear tabla, insertar y buscar
+├── 🖥️ app_kivy.py                → Interfaz gráfica de escritorio (Kivy), versión anterior
+├── 📦 requirements.txt           → Dependencias de la aplicación web
 ├── 🔑 secret_config_sample.py    → Plantilla de los datos de conexión (copiar como secret_config.py)
 │
 ├── 🗄️ sql/                       → Scripts SQL de referencia (crear, borrar, insertar, buscar)
+│
+├── 🧩 templates/                 → Plantillas HTML de la aplicación web
+│   ├── buscar_y_guardar_empleado.html → Página de inicio (menú): buscar, liquidar/insertar y crear tabla
+│   ├── mostrar_empleados.html    → Resultado de insertar un empleado
+│   ├── empleado_encontrado.html  → Resultado de una búsqueda exitosa
+│   ├── empleado_no_encontrado.html → Mensaje cuando el empleado no existe
+│   └── resultado_tabla.html      → Resultado de crear la tabla
+│
+├── 🎨 static/
+│   └── estilos.css               → Estilos de la aplicación web
 │
 ├── 📁 src/
 │   ├── 🧠 model/
@@ -203,17 +215,27 @@ Contiene la parte encargada de la interacción con el usuario.
 
 `consola_nomina.py` → Contiene la interfaz de consola para interactuar con el sistema de liquidación de nómina.
 
+Las vistas de la aplicación web son las plantillas HTML de la carpeta `templates/`, con sus estilos en `static/`.
+
+## 🔌 controller
+
+`trabajadores_controller.py` → Crea y borra la tabla `Empleado`, e inserta, busca y borra empleados en la base de datos PostgreSQL.
+
+Las rutas web (`/`, `/crear_tabla`, `/guardar_empleado`, `/buscar_empleado`) están definidas en `app.py`.
+
 ## 🔗 Organización general
 
 La estructura del proyecto permite separar claramente cada responsabilidad:
 
-🧠 Model → 🖥️ View → 🧪 Test
+🧠 Model → 🔌 Controller → 🖥️ View → 🧪 Test
 
 De esta manera:
 
 🧠 Model: realiza los cálculos y validaciones de nómina.
 
-🖥️ View: permite la interacción mediante consola.
+🔌 Controller: guarda y consulta los empleados en la base de datos.
+
+🖥️ View: permite la interacción mediante la página web (y también por consola).
 
 🧪 Test: comprueba que el sistema funcione correctamente.
 
@@ -239,6 +261,8 @@ Como futuras mejoras del proyecto, se busca:
 | Tecnología | Uso |
 | --- | --- |
 | 🐍 **Python** | Desarrollo del programa |
+| 🌐 **Flask** | Aplicación web |
+| 🐘 **PostgreSQL + psycopg2** | Base de datos de empleados |
 | 🧪 **unittest** | Creación y ejecución de pruebas unitarias |
 | 🐙 **GitHub** | Almacenamiento y gestión del proyecto |
 
@@ -254,62 +278,77 @@ El proyecto se desarrolló siguiendo el siguiente proceso:
 
 # ▶️ Ejecución del proyecto y pruebas
 
-La aplicación guarda los empleados en una base de datos **PostgreSQL** (por ejemplo, una base de datos gratuita en [Render](https://render.com)) usando `psycopg2`, y tiene una interfaz gráfica hecha con **Kivy**.
+La aplicación es una **aplicación web hecha con Flask** que guarda los empleados en una base de datos **PostgreSQL** (por ejemplo, una base de datos gratuita en [Render](https://render.com)) usando `psycopg2`.
 
-## 1️⃣ Clonar el repositorio e instalar dependencias
+## 1️⃣ Requisitos
+
+* Python 3.10 o superior.
+* Una base de datos PostgreSQL (local o en la nube, por ejemplo en Render).
+* Git.
+
+## 2️⃣ Clonar el repositorio e instalar dependencias
 
 ```
-git clone URL_DEL_REPOSITORIO
+git clone https://github.com/Juanjo7550/LIQUIDADOR.NOMINA.git
 cd LIQUIDADOR.NOMINA
 python -m venv .venv
 .venv\Scripts\activate        (en Linux/Mac: source .venv/bin/activate)
-pip install psycopg2-binary kivy
+pip install -r requirements.txt
 ```
 
-## 2️⃣ Crear la base de datos
+> Si la instalación de `psycopg2` falla (es común en Windows), instale la versión precompilada: `pip install psycopg2-binary`.
 
-1. Cree una base de datos PostgreSQL (en Render: *New → PostgreSQL*, y copie los datos de la sección *Connections*: host, puerto, nombre de la base de datos, usuario y contraseña).
-2. No hace falta crear la tabla a mano: el controlador la crea con el método `crear_tabla()` (ver paso 4). Si se prefiere, también se puede ejecutar el script `sql/crear_trabajadores.sql` desde un cliente SQL como DBeaver o pgAdmin.
+## 3️⃣ Crear una base de datos en blanco
 
-## 3️⃣ Configurar la conexión
+La aplicación puede arrancar con una base de datos **completamente vacía**: la tabla se crea desde la propia página web (paso 6).
+
+* **En Render:** *New → PostgreSQL*. Cuando esté lista, copie los datos de la sección *Connections*: host, puerto, nombre de la base de datos, usuario y contraseña.
+* **En local:** con PostgreSQL instalado, cree una base de datos vacía, por ejemplo:
+
+```
+psql -U postgres -c "CREATE DATABASE nomina;"
+```
+
+## 4️⃣ Configurar la conexión
 
 Los datos de conexión **no** se guardan en el código. Se leen del archivo `secret_config.py`, que está en `.gitignore` y no se sube al repositorio.
 
 1. Copie `secret_config_sample.py` y renombre la copia como `secret_config.py` (en la carpeta raíz del proyecto).
-2. Reemplace en `secret_config.py` los valores de ejemplo por los datos reales de su base de datos.
+2. Reemplace en `secret_config.py` los valores de ejemplo por los datos reales de su base de datos:
 
-## 4️⃣ Crear (o borrar) la tabla
-
-Desde la carpeta raíz del proyecto:
-
+```python
+PGDATABASE = "nomina"
+PGUSER = "postgres"
+PGPASSWORD = "su_contraseña"
+PGHOST = "localhost"          # o el host que entrega Render
+PGPORT = 5432
 ```
-python -c "import sys; sys.path.append('src'); from controller.trabajadores_controller import Trabajadorescontroller; Trabajadorescontroller().crear_tabla()"
-```
 
-Para borrar la tabla con todos sus datos, cambie `crear_tabla()` por `borrar_tabla()`.
+## 5️⃣ Ejecutar la aplicación web
 
-## 5️⃣ Ejecutar el programa
-
-Desde la carpeta raíz del proyecto:
+Desde la carpeta raíz del proyecto, con el entorno virtual activado:
 
 ```
 python app.py
 ```
 
-En la ventana se ingresan el código, el nombre, el salario, los días trabajados y las horas extra/recargos:
+Luego abra en el navegador: **http://127.0.0.1:5000**
 
-* **Insertar**: guarda el empleado en la base de datos.
-* **Buscar**: busca por el código ingresado y llena el formulario con los datos guardados.
-* **Calcular**: muestra el neto a pagar.
-* **Limpiar**: borra el formulario.
+## 6️⃣ Usar la aplicación
 
-También existe una versión de consola del cálculo de nómina (sin base de datos):
+La página de inicio funciona como **menú** con acceso a todas las funcionalidades:
+
+* 🗄️ **Crear tabla Empleado**: crea la tabla en la base de datos. Es lo **primero que se debe hacer con una base de datos en blanco**. Si la tabla ya existe, la aplicación lo informa y no cambia nada.
+* 🧾 **Liquidar nómina (insertar)**: se ingresan el código, el nombre, el salario base, los días trabajados y las horas extra/recargos; la aplicación calcula el neto a pagar y guarda el empleado en la base de datos.
+* 🔍 **Buscar empleado**: busca un empleado por su código y muestra sus datos guardados. Si no existe, muestra un mensaje indicándolo.
+
+También existen, como versiones alternativas, una interfaz de escritorio con Kivy (`python app_kivy.py`, requiere `pip install kivy`) y una versión de consola del cálculo de nómina sin base de datos:
 
 ```
 python src/view/consola_nomina.py
 ```
 
-## 6️⃣ Ejecutar las pruebas
+## 7️⃣ Ejecutar las pruebas
 
 Desde la carpeta raíz del proyecto:
 
@@ -317,8 +356,8 @@ Desde la carpeta raíz del proyecto:
 python -m unittest discover -s test -t .
 ```
 
-* `test/test_nomina.py`: 23 pruebas de la lógica de nómina.
-* `test/test_trabajadores_controller.py`: 10 pruebas del controlador contra la base de datos (insertar, buscar, borrar y crear/borrar la tabla, con casos normales y de error). Antes de cada prueba se borra y se vuelve a crear la tabla `Empleado` (fixtures `setUp` / `tearDown`), así que **las pruebas borran los datos de esa tabla**.
+* `test/test_nomina.py`: 23 pruebas de la lógica de nómina (no requieren base de datos).
+* `test/test_trabajadores_controller.py`: 10 pruebas del controlador contra la base de datos (insertar, buscar, borrar y crear/borrar la tabla, con casos normales y de error). Requieren tener configurado `secret_config.py`. Antes de cada prueba se borra y se vuelve a crear la tabla `Empleado` (fixtures `setUp` / `tearDown`), así que **las pruebas borran los datos de esa tabla**; se recomienda usar una base de datos de pruebas.
 
 Si todo funciona correctamente, se mostrará `OK` al final de la ejecución.
 
